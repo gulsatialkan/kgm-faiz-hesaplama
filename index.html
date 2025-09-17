@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KGM Faiz ve Gecikme Payı Hesaplama Sistemi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, hsl(19, 74%, 79%) 0%, #eb6004 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #232424, #acaeb0);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .main-content {
+            padding: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            border: 1px solid #e9ecef;
+        }
+        .card h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        input[type="date"], input[type="number"], input[type="text"], select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #27ae60, #229954);
+            color: white;
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .btn-warning {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+            padding: 8px 12px;
+            font-size: 14px;
+        }
+        .delay-info {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .delay-info h4 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        .delay-days {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .rates-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .rates-table th,
+        .rates-table td {
+            padding: 12px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+        .rates-table th {
+            background: #f1f2f6;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .rates-table tr:hover {
+            background: #f8f9fa;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .calculation-result {
+            background: linear-gradient(135deg, #8e44ad, #9b59b6);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .calculation-result h4 {
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+        }
+        .total-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .calculation-details {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .period-calculation {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            font-size: 14px;
+        }
+        .add-rate-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: end;
+        }
+        .add-rate-form input, .add-rate-form select {
+            flex: 1;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        .form-row .form-group {
+            flex: 1;
+        }
+        .interest-type-info {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+        }
+        .interest-type-info h5 {
+            color: #2980b9;
+            margin-bottom: 10px;
+        }
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+           
+            .header h1 {
+                font-size: 2rem;
+            }
+           
+            .add-rate-form, .form-row {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏛️ KGM Faiz ve Gecikme Payı Hesaplama Sistemi</h1>
+            <p>Karayolları Genel Müdürlüğü - Taşınmazlar Dairesi Başkanlığı</p>
+        </div>
+        <div class="main-content">
+            <!-- Tarih Girişi ve Hesaplama -->
+            <div class="card">
+                <h3>📅 Hesaplama Parametreleri</h3>
+               
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="interestType">Faiz Türü:</label>
+                        <select id="interestType" onchange="updateInterestRates()">
+                            <option value="amme">Amme Alacakları (6183/51. Md.)</option>
+                            <option value="yasal">Yasal Faiz (3095 Sy. Kanun)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="dayCount">Yıldaki Gün Sayısı:</label>
+                        <select id="dayCount">
+                            <option value="365">365 gün</option>
+                            <option value="360">360 gün</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Faiz Başlangıç Tarihi:</label>
+                        <input type="date" id="startDate" onchange="calculateDelayDays()">
+                    </div>
+                    <div class="form-group">
+                        <label for="endDate">Faiz Bitiş Tarihi:</label>
+                        <input type="date" id="endDate" onchange="calculateDelayDays()">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="principal">Anapara (TL):</label>
+                    <input type="number" id="principal" placeholder="2500.00" step="0.01">
+                </div>
+                <div class="delay-info">
+                    <h4>Faiz Süresi</h4>
+                    <div class="delay-days" id="delayDays">0 gün</div>
+                </div>
+                <button class="btn btn-primary" onclick="calculateInterest()" style="width: 100%;">
+                    💰 Faiz Tutarı Hesapla
+                </button>
+            </div>
+            <!-- Faiz Oranları -->
+            <div class="card">
+                <h3 id="ratesTitle">📊 Amme Alacakları Faiz Oranları</h3>
+               
+                <div class="interest-type-info" id="interestInfo">
+                    <h5>Amme Alacakları (6183/51. Md.)</h5>
+                    <p>Bu faiz türü için dönemsel faiz oranları ve değişim tarihleri gösterilmektedir.</p>
+                </div>
+               
+                <table class="rates-table">
+                    <thead>
+                        <tr>
+                            <th>Değişim Tarihi</th>
+                            <th>Faiz Oranı (%)</th>
+                            <th>Rastalayan Vade Gün Sayısı</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ratesTableBody">
+                        <!-- Faiz oranları JavaScript ile yüklenecek -->
+                    </tbody>
+                </table>
+                <div class="add-rate-form">
+                    <div>
+                        <label for="newDate">Değişim Tarihi:</label>
+                        <input type="date" id="newDate">
+                    </div>
+                    <div>
+                        <label for="newRate">Faiz Oranı (%):</label>
+                        <input type="number" id="newRate" placeholder="16.8" step="0.1">
+                    </div>
+                    <button class="btn btn-success" onclick="addRate()">➕ Ekle</button>
+                </div>
+            </div>
+            <!-- Hesaplama Sonucu -->
+            <div class="card full-width" id="resultSection" style="display: none;">
+                <div class="calculation-result">
+                    <h4>💳 Faiz Hesaplama Sonucu</h4>
+                   
+                    <div class="total-amount" id="totalAmount">0.00 TL</div>
+                   
+                    <div class="calculation-details" id="calculationDetails">
+                        <!-- Hesaplama detayları buraya gelecek -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Faiz oranları veri seti
+        const interestRatesData = {
+            amme: [
+                { date: '2024-05-21', rate: 54.0 },
+                { date: '2023-11-14', rate: 42.0 },
+                { date: '2022-07-21', rate: 30.0 },
+                { date: '2019-12-30', rate: 19.2 },
+                { date: '2019-10-01', rate: 24.0 },
+                { date: '2019-07-01', rate: 30.0 },
+                { date: '2018-09-05', rate: 24.0 },
+                { date: '2010-10-19', rate: 16.8 }
+            ],
+            yasal: [
+                { date: '2024-06-01', rate: 24.0 },
+                { date: '2006-01-01', rate: 9.0 }
+            ]
+        };
+
+        let currentInterestRates = [];
+
+        // Sayfa yüklendiğinde başlat
+        window.onload = function() {
+            updateInterestRates();
+        };
+
+        // Faiz türüne göre oranları güncelle
+        function updateInterestRates() {
+            const interestType = document.getElementById('interestType').value;
+            currentInterestRates = [...interestRatesData[interestType]];
+           
+            // Başlık ve bilgi güncelle
+            if (interestType === 'amme') {
+                document.getElementById('ratesTitle').textContent = '📊 Amme Alacakları Faiz Oranları';
+                document.getElementById('interestInfo').innerHTML = `
+                    <h5>Amme Alacakları (6183/51. Md.)</h5>
+                    <p>Bu faiz türü için dönemsel faiz oranları ve değişim tarihleri gösterilmektedir.</p>
+                `;
+            } else {
+                document.getElementById('ratesTitle').textContent = '📊 Yasal Faiz Oranları';
+                document.getElementById('interestInfo').innerHTML = `
+                    <h5>Yasal Faiz (3095 Sy. Kanun)</h5>
+                    <p>Bu faiz türü için dönemsel faiz oranları ve değişim tarihleri gösterilmektedir.</p>
+                `;
+            }
+           
+            displayRates();
+        }
+
+        // Oranları tabloda göster
+        function displayRates() {
+            const tbody = document.getElementById('ratesTableBody');
+            tbody.innerHTML = '';
+           
+            // Tarihe göre sırala (en yeni en üstte)
+            currentInterestRates.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach((item, index) => {
+                const row = tbody.insertRow();
+                const formattedDate = new Date(item.date).toLocaleDateString('tr-TR');
+                row.innerHTML = `
+                    <td><strong>${formattedDate}</strong></td>
+                    <td>${item.rate}%</td>
+                    <td id="days-${index}">-</td>
+                    <td>
+                        <button class="btn btn-warning" onclick="editRate(${index})" title="Düzenle">✏️</button>
+                        <button class="btn btn-danger" onclick="deleteRate(${index})" title="Sil">🗑️</button>
+                    </td>
+                `;
+            });
+        }
+
+        // Yeni oran ekle
+        function addRate() {
+            const date = document.getElementById('newDate').value;
+            const rate = parseFloat(document.getElementById('newRate').value);
+           
+            if (!date || !rate || rate <= 0) {
+                alert('Lütfen geçerli bir tarih ve faiz oranı girin.');
+                return;
+            }
+           
+            // Aynı tarih var mı kontrol et
+            const existingIndex = currentInterestRates.findIndex(item => item.date === date);
+            if (existingIndex !== -1) {
+                if (confirm(`${new Date(date).toLocaleDateString('tr-TR')} tarihli oran zaten mevcut. Güncellensin mi?`)) {
+                    currentInterestRates[existingIndex].rate = rate;
+                }
+            } else {
+                currentInterestRates.push({ date, rate });
+            }
+           
+            // Formu temizle ve tabloyu güncelle
+            document.getElementById('newDate').value = '';
+            document.getElementById('newRate').value = '';
+            displayRates();
+        }
+
+        // Oran sil
+        function deleteRate(index) {
+            const sortedRates = currentInterestRates.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const formattedDate = new Date(sortedRates[index].date).toLocaleDateString('tr-TR');
+            if (confirm(`${formattedDate} tarihli oranı silmek istediğinizden emin misiniz?`)) {
+                const dateToDelete = sortedRates[index].date;
+                currentInterestRates = currentInterestRates.filter(item => item.date !== dateToDelete);
+                displayRates();
+            }
+        }
+
+        // Oran düzenle
+        function editRate(index) {
+            const sortedRates = currentInterestRates.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const item = sortedRates[index];
+            const formattedDate = new Date(item.date).toLocaleDateString('tr-TR');
+            const newRate = prompt(`${formattedDate} tarihli oran için yeni faiz oranı (%):`, item.rate);
+           
+            if (newRate !== null && !isNaN(newRate) && parseFloat(newRate) > 0) {
+                const originalIndex = currentInterestRates.findIndex(r => r.date === item.date);
+                currentInterestRates[originalIndex].rate = parseFloat(newRate);
+                displayRates();
+            }
+        }
+
+        // Gecikme günlerini hesapla
+        function calculateDelayDays() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+           
+            if (startDate && endDate) {
+                const start = new Date(startDate);
+                const end = new Date(endDate);
+                const diffTime = end - start;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+               
+                const delayDays = diffDays > 0 ? diffDays : 0;
+                document.getElementById('delayDays').textContent = `${delayDays} gün`;
+               
+                // Tarihleri değiştirdiğinde rastalayan gün sayısını da güncelle
+                displayRates();
+               
+                return delayDays;
+            }
+           
+            document.getElementById('delayDays').textContent = '0 gün';
+            displayRates();
+            return 0;
+        }
+
+        // Faiz tutarını hesapla
+        function calculateInterest() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const principal = parseFloat(document.getElementById('principal').value);
+            const dayCount = parseInt(document.getElementById('dayCount').value);
+            const totalDays = calculateDelayDays();
+           
+            if (!startDate || !endDate || !principal || totalDays <= 0) {
+                alert('Lütfen tüm gerekli alanları doldurun ve geçerli tarihler girin.');
+                return;
+            }
+           
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            let calculationDetails = '';
+            let totalInterest = 0;
+            let currentDate = new Date(start);
+           
+            // Oranları tarihe göre sırala
+            const sortedRates = currentInterestRates.sort((a, b) => new Date(a.date) - new Date(b.date));
+           
+            let periodCount = 1;
+           
+            while (currentDate < end) {
+                // Bu tarihe uygun faiz oranını bul
+                let applicableRate = sortedRates[0]; // varsayılan ilk oran
+               
+                for (let i = 0; i < sortedRates.length; i++) {
+                    if (new Date(sortedRates[i].date) <= currentDate) {
+                        applicableRate = sortedRates[i];
+                    } else {
+                        break;
+                    }
+                }
+               
+                // Sonraki oran değişim tarihi veya bitiş tarihi
+                let nextChangeDate = end;
+                for (let i = 0; i < sortedRates.length; i++) {
+                    const rateDate = new Date(sortedRates[i].date);
+                    if (rateDate > currentDate && rateDate < end) {
+                        nextChangeDate = rateDate;
+                        break;
+                    }
+                }
+               
+                // Bu dönemde geçen gün sayısı
+                const periodEnd = nextChangeDate;
+                const periodDays = Math.ceil((periodEnd - currentDate) / (1000 * 60 * 60 * 24));
+               
+                if (periodDays > 0) {
+                    // Faiz hesaplama: (Anapara × Faiz Oranı × Gün Sayısı) / (Yıldaki Gün Sayısı × 100)
+                    const periodInterest = (principal * applicableRate.rate * periodDays) / (dayCount * 100);
+                    totalInterest += periodInterest;
+                   
+                    calculationDetails += `
+                        <div class="period-calculation">
+                            <span><strong>Dönem ${periodCount}:</strong> ${currentDate.toLocaleDateString('tr-TR')} - ${periodEnd.toLocaleDateString('tr-TR')}</span>
+                            <span>${periodDays} gün × ${applicableRate.rate}% = <strong>${periodInterest.toFixed(2)} TL</strong></span>
+                        </div>
+                    `;
+                   
+                    periodCount++;
+                }
+               
+                // Sonraki döneme geç
+                currentDate = new Date(nextChangeDate);
+            }
+           
+            // Toplam tutarı hesapla
+            const totalAmount = principal + totalInterest;
+           
+            // Sonuçları göster
+            document.getElementById('totalAmount').innerHTML = `
+                <div>Anapara: ${principal.toFixed(2)} TL</div>
+                <div>Faiz Tutarı: ${totalInterest.toFixed(2)} TL</div>
+                <div style="border-top: 2px solid rgba(255,255,255,0.3); padding-top: 10px; margin-top: 10px;">
+                    Toplam Tutar: ${totalAmount.toFixed(2)} TL
+                </div>
+            `;
+           
+            document.getElementById('calculationDetails').innerHTML = calculationDetails;
+            document.getElementById('resultSection').style.display = 'block';
+           
+            // Sonuç bölümüne kaydır
+            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>
